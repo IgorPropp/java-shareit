@@ -1,27 +1,22 @@
 package ru.practicum.shareit.item.storage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 @Repository
 public class ItemStorageImpl implements ItemStorage {
     private Long id = 1L;
     private final List<Item> items = new ArrayList<>();
-    private final UserStorage userStorage;
-
-    public ItemStorageImpl(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     public List<ItemDto> getItems(Long userId) {
         List<ItemDto> itemsByUserId = new ArrayList<>();
@@ -30,21 +25,18 @@ public class ItemStorageImpl implements ItemStorage {
                 itemsByUserId.add(ItemMapper.toDto(item));
             }
         }
+        log.info("List of all items requested");
         return itemsByUserId;
     }
 
     public ItemDto createItem(Long userId, ItemDto itemDto) {
-        for (UserDto user : userStorage.getAllUsers()) {
-            if (user.getId().equals(userId)) {
-                itemDto.setId(id);
-                Item item = ItemMapper.fromDto(userId, itemDto);
-                item.setOwner(userId);
-                items.add(item);
-                id++;
-                return itemDto;
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        itemDto.setId(id);
+        Item item = ItemMapper.fromDto(userId, itemDto);
+        item.setOwner(userId);
+        items.add(item);
+        id++;
+        log.info("Item created");
+        return itemDto;
     }
 
     public void deleteItem(Long userId, Long itemId) throws IllegalAccessException {
@@ -53,6 +45,7 @@ public class ItemStorageImpl implements ItemStorage {
             Item item = itemIterator.next();
             if (item.getId().equals(userId) && item.getId().equals(itemId)) {
                 itemIterator.remove();
+                log.info("Item deleted");
                 return;
             }
         }
@@ -71,6 +64,7 @@ public class ItemStorageImpl implements ItemStorage {
                 if (itemDto.getAvailable() != null) {
                     item.setAvailable(itemDto.getAvailable());
                 }
+                log.info("Item updated");
                 return ItemMapper.toDto(item);
             }
         }
@@ -80,6 +74,7 @@ public class ItemStorageImpl implements ItemStorage {
     public ItemDto getItemDto(Long userId, Long itemId) throws IllegalAccessException {
         for (Item item : items) {
             if (item.getId().equals(itemId)) {
+                log.info("Item with id=" + itemId + " is requested");
                 return ItemMapper.toDto(item);
             }
         }
@@ -88,7 +83,10 @@ public class ItemStorageImpl implements ItemStorage {
 
     public List<ItemDto> searchForItem(Long userId, String string) {
         List<ItemDto> itemsAfterSearch = new ArrayList<>();
-        if (string.isEmpty()) return itemsAfterSearch;
+        if (string.isEmpty()) {
+            log.info("Item search for '" + string + "' is NOT successful");
+            return itemsAfterSearch;
+        }
 
         for (Item item : items) {
             if (item.getName().toLowerCase().contains(string) &&
@@ -99,6 +97,7 @@ public class ItemStorageImpl implements ItemStorage {
                 itemsAfterSearch.add(ItemMapper.toDto(item));
             }
         }
+        log.info("Item search for '" + string + "' is successful");
         return itemsAfterSearch;
     }
 

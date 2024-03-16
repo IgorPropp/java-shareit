@@ -5,7 +5,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import java.util.List;
 
 public interface ItemService {
-    ItemDto createItem(Long userId, ItemDto itemDto);
+    ItemDto createItem(Long userId, ItemDto itemDto) throws IllegalAccessException;
 
     ItemDto updateItem(Long userId, ItemDto itemDto);
 

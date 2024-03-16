@@ -21,7 +21,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto createItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
-                       @RequestBody @Valid ItemDto itemDto) {
+                       @RequestBody @Valid ItemDto itemDto) throws IllegalAccessException {
         return itemService.createItem(userId, itemDto);
     }
 
