@@ -34,8 +34,8 @@ public class ItemStorageImpl implements ItemStorage {
         Item item = ItemMapper.fromDto(userId, itemDto);
         item.setOwner(userId);
         items.add(item);
+        log.info("Item id={} created", id);
         id++;
-        log.info("Item created");
         return itemDto;
     }
 
@@ -45,7 +45,7 @@ public class ItemStorageImpl implements ItemStorage {
             Item item = itemIterator.next();
             if (item.getId().equals(userId) && item.getId().equals(itemId)) {
                 itemIterator.remove();
-                log.info("Item deleted");
+                log.info("Item id={} deleted", itemId);
                 return;
             }
         }
@@ -64,7 +64,7 @@ public class ItemStorageImpl implements ItemStorage {
                 if (itemDto.getAvailable() != null) {
                     item.setAvailable(itemDto.getAvailable());
                 }
-                log.info("Item updated");
+                log.info("Item id={} updated", item.getId());
                 return ItemMapper.toDto(item);
             }
         }
@@ -74,7 +74,7 @@ public class ItemStorageImpl implements ItemStorage {
     public ItemDto getItemDto(Long userId, Long itemId) throws IllegalAccessException {
         for (Item item : items) {
             if (item.getId().equals(itemId)) {
-                log.info("Item with id=" + itemId + " is requested");
+                log.info("Item id={} is requested", itemId);
                 return ItemMapper.toDto(item);
             }
         }
@@ -84,7 +84,7 @@ public class ItemStorageImpl implements ItemStorage {
     public List<ItemDto> searchForItem(Long userId, String string) {
         List<ItemDto> itemsAfterSearch = new ArrayList<>();
         if (string.isEmpty()) {
-            log.info("Item search for '" + string + "' is NOT successful");
+            log.info("Item search for '{}' is NOT successful", string);
             return itemsAfterSearch;
         }
 
@@ -97,7 +97,7 @@ public class ItemStorageImpl implements ItemStorage {
                 itemsAfterSearch.add(ItemMapper.toDto(item));
             }
         }
-        log.info("Item search for '" + string + "' is successful");
+        log.info("Item search for '{}' is successful", string);
         return itemsAfterSearch;
     }
 

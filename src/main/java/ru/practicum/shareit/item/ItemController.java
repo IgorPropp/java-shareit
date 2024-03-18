@@ -13,38 +13,39 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
+    private static final String SHARERUSERID = "X-Sharer-User-Id";
 
     @GetMapping
-    public List<ItemDto> getItems(@RequestHeader(name = "X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getItems(@RequestHeader(name = SHARERUSERID) Long userId) {
         return itemService.getItems(userId);
     }
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+    public ItemDto createItem(@RequestHeader(name = SHARERUSERID) Long userId,
                        @RequestBody @Valid ItemDto itemDto) throws IllegalAccessException {
         return itemService.createItem(userId, itemDto);
     }
 
     @DeleteMapping("/{itemId}")
-    public void deleteItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+    public void deleteItem(@RequestHeader(name = SHARERUSERID) Long userId,
                            @PathVariable Long itemId) throws IllegalAccessException {
         itemService.deleteItem(userId, itemId);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+    public ItemDto updateItem(@RequestHeader(name = SHARERUSERID) Long userId,
                           @RequestBody ItemDto itemDto) {
         return itemService.updateItem(userId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemDto(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+    public ItemDto getItemDto(@RequestHeader(name = SHARERUSERID) Long userId,
                               @PathVariable Long itemId) throws IllegalAccessException {
         return itemService.getItemDto(userId, itemId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchForItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+    public List<ItemDto> searchForItem(@RequestHeader(name = SHARERUSERID) Long userId,
                                          @RequestParam(value = "text") String string) {
         return itemService.searchForItem(userId, string);
     }

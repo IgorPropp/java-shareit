@@ -32,7 +32,7 @@ public class UserStorageImpl implements UserStorage {
     public UserDto getUser(Long userId) {
         for (User user : users) {
             if (user.getId().equals(userId)) {
-                log.info("Found user with id=" + userId);
+                log.info("Found user with id={}", userId);
                 return UserMapper.toDto(user);
             }
         }
@@ -47,9 +47,9 @@ public class UserStorageImpl implements UserStorage {
         }
         User user = UserMapper.fromDto(id, userDto);
         userDto.setId(id);
-        id++;
+        log.info("User id={} created", id);
         users.add(user);
-        log.info("User created");
+        id++;
         return userDto;
     }
 
@@ -59,7 +59,7 @@ public class UserStorageImpl implements UserStorage {
             User user = userIterator.next();
             if (user.getId().equals(id)) {
                 userIterator.remove();
-                log.info("User deleted");
+                log.info("User id={} deleted", id);
                 return;
             }
         }
@@ -81,7 +81,7 @@ public class UserStorageImpl implements UserStorage {
                     if (updatedUser.getName() != null) {
                         user.setName(updatedUser.getName());
                     }
-                    log.info("User updated");
+                    log.info("User id={} updated", id);
                     return UserMapper.toDto(user);
                 } else {
                     throw new IllegalAccessException("This email already exists");
