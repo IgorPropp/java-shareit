@@ -1,21 +1,20 @@
 package ru.practicum.shareit.item.storage;
 
-import ru.practicum.shareit.item.dto.ItemDto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
 
 import java.util.List;
 
-public interface ItemStorage {
+public interface ItemStorage extends JpaRepository<Item, Long> {
 
-    ItemDto createItem(Long userId, ItemDto itemDto);
+    List<Item> findAllByOwner(User userId);
 
-    List<ItemDto> getItems(Long userId);
-
-    void deleteItem(Long userId, Long itemId) throws IllegalAccessException;
-
-    ItemDto updateItem(Long userId, ItemDto itemDto);
-
-    ItemDto getItemDto(Long userId, Long itemId) throws IllegalAccessException;
-
-    List<ItemDto> searchForItem(Long userId, String string);
+    @Query("SELECT i FROM Item i WHERE" +
+            " (LOWER(i.name) LIKE %:string% OR LOWER(i.description) LIKE %:string%)" +
+            " AND i.available = true")
+    List<Item>findByNameOrDescriptionContainingIgnoreCase(String string);
 
 }

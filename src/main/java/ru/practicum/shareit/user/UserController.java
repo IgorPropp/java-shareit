@@ -28,8 +28,8 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto createUser(@RequestBody @Valid UserDto userDto) {
-        return userService.createUser(userDto);
+    public User createUser(@RequestBody @Valid User user) {
+        return userService.createUser(user);
     }
 
     @DeleteMapping("/{userId}")

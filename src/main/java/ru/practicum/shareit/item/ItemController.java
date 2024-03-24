@@ -34,8 +34,9 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader(name = SHARERUSERID) Long userId,
-                          @RequestBody ItemDto itemDto) {
-        return itemService.updateItem(userId, itemDto);
+                              @PathVariable Long itemId,
+                              @RequestBody ItemDto itemDto) {
+        return itemService.updateItem(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
@@ -46,7 +47,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> searchForItem(@RequestHeader(name = SHARERUSERID) Long userId,
-                                         @RequestParam(value = "text") String string) {
+                                       @RequestParam(value = "text") String string) {
         return itemService.searchForItem(userId, string);
     }
 }
