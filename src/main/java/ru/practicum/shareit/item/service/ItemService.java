@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item.service;
 
-import org.springframework.stereotype.Service;
+import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.BookingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
@@ -15,7 +15,9 @@ public interface ItemService {
 
     List<BookingItemDto> getItems(Long userId);
 
-    ItemDto getItemDto(Long userId, Long itemId) throws IllegalAccessException;
+    BookingItemDto getItemDto(Long userId, Long itemId) throws IllegalAccessException;
 
     List<ItemDto> searchForItem(Long userId, String string);
+
+    CommentDto addComment(Long userId, Long itemId, CommentDto commentDto);
 }

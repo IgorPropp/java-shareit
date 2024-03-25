@@ -20,7 +20,7 @@ public class BookingMapper {
         booking.setEnd(bookingDto.getEnd());
         booking.setStatus(bookingDto.getStatus());
         booking.setItemId(bookingDto.getItem().getId());
-        booking.setBookerId(bookingDto.getBooker().getId());
+        booking.setBooker(bookingDto.getBooker().getId());
         return booking;
     }
 
