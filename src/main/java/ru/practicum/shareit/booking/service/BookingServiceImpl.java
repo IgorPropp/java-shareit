@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class BookingServiceImpl implements BookingService{
+public class BookingServiceImpl implements BookingService {
     private final UserService userService;
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
@@ -127,7 +127,7 @@ public class BookingServiceImpl implements BookingService{
                 throw new IllegalStateException("User has no items");
             }
             return bookingsByOwner;
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: UNSUPPORTED_STATUS");
         }
     }
@@ -158,7 +158,7 @@ public class BookingServiceImpl implements BookingService{
                     break;
             }
             return bookings;
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: UNSUPPORTED_STATUS");
         }
     }
