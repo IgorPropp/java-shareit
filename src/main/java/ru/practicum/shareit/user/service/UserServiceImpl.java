@@ -34,7 +34,7 @@ class UserServiceImpl implements UserService {
         return user;
     }
 
-    public void deleteUser(Long id) throws IllegalAccessException {
+    public void deleteUser(Long id) {
         Optional<User> user = userStorage.findById(id);
         if (user.isPresent()) {
             userStorage.deleteById(id);
@@ -43,7 +43,7 @@ class UserServiceImpl implements UserService {
         }
     }
 
-    public UserDto updateUser(Long id, UserDto userDto) throws IllegalAccessException {
+    public UserDto updateUser(Long id, UserDto userDto) {
         Optional<User> user = userStorage.findById(id);
         if (user.isPresent()) {
             if (userDto.getEmail() != null) user.get().setEmail(userDto.getEmail());
