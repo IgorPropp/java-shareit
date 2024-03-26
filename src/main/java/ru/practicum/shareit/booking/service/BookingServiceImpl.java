@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.GetAllBookingsDto;
+import ru.practicum.shareit.booking.model.BookingForList;
 import ru.practicum.shareit.booking.enums.BookingState;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingStorage;
-import ru.practicum.shareit.booking.storage.GetAllBookingsStorage;
+import ru.practicum.shareit.booking.storage.BookingForListStorage;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -22,32 +22,31 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    private final UserService userService;
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
     private final BookingStorage bookingStorage;
-    private final GetAllBookingsStorage getAllBookingsStorage;
-    private final ItemMapper itemMapper;
+    private final BookingForListStorage bookingForListStorage;
 
-    public BookingDto create(Long userId, Booking booking) {
+    public BookingDto create(Long userId, Booking booking) throws IllegalAccessException {
         if (!bookingDatesAreValid(booking)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking time is incorrect");
         }
-        UserDto userDto = userService.getUser(userId);
-        ItemDto itemDto = itemMapper.toDto(itemStorage.findById(booking.getItemId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found")));
+        UserDto userDto = UserMapper.toDto(userStorage.findById(userId).orElseThrow());
+        ItemDto itemDto = ItemMapper.toDto(itemStorage.findById(booking.getItemId()).orElseThrow());
         if (itemStorage.getById(booking.getItemId()).getOwner().getId().equals(userId))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is the owner");
+            throw new NoSuchElementException("User is the owner");
         if (itemDto.getAvailable().equals(false)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item is unavailable");
+            throw new IllegalAccessException("Item is unavailable");
         }
         booking.setBooker(userDto.getId());
         booking.setStatus(BookingStatus.WAITING);
@@ -55,16 +54,13 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toDto(booking, itemDto, userDto);
     }
 
-    public BookingDto book(Long userId, Long bookingId, Boolean approved) {
-        Booking booking = bookingStorage.findById(bookingId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-        Item item = itemStorage.findById(booking.getItemId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found"));
-        User booker = userStorage.findById(booking.getBooker()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booker not found"));
+    public BookingDto book(Long userId, Long bookingId, Boolean approved) throws IllegalAccessException {
+        Booking booking = bookingStorage.findById(bookingId).orElseThrow();
+        Item item = itemStorage.findById(booking.getItemId()).orElseThrow();
+        User booker = userStorage.findById(booking.getBooker()).orElseThrow();
         if (item.getOwner().getId().equals(userId)) {
             if (approved && booking.getStatus().equals(BookingStatus.APPROVED)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking already approved");
+                throw new IllegalAccessException("Booking is already approved");
             }
             if (approved) {
                 booking.setStatus(BookingStatus.APPROVED);
@@ -72,53 +68,49 @@ public class BookingServiceImpl implements BookingService {
                 booking.setStatus(BookingStatus.REJECTED);
             }
             bookingStorage.save(booking);
-            return BookingMapper.toDto(booking, itemMapper.toDto(item), UserMapper.toDto(booker));
+            return BookingMapper.toDto(booking, ItemMapper.toDto(item), UserMapper.toDto(booker));
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found");
+        throw new NoSuchElementException("Booking not found");
     }
 
     public BookingDto get(Long bookingId, Long userId) {
-        Booking booking = bookingStorage.findById(bookingId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-        Item item = itemStorage.findById(booking.getItemId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found"));
-        User user = userStorage.findById(booking.getBooker()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Booking booking = bookingStorage.findById(bookingId).orElseThrow();
+        Item item = itemStorage.findById(booking.getItemId()).orElseThrow();
+        User user = userStorage.findById(booking.getBooker()).orElseThrow();
         if (booking.getBooker().equals(userId) || item.getOwner().getId().equals(userId)) {
-            return BookingMapper.toDto(booking, itemMapper.toDto(item), UserMapper.toDto(user));
+            return BookingMapper.toDto(booking, ItemMapper.toDto(item), UserMapper.toDto(user));
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found");
+        throw new NoSuchElementException("Booking not found");
     }
 
-    public List<GetAllBookingsDto> getAllBookingsByOwner(Long userId, String string) {
+    public List<BookingForList> getAllBookingsByOwner(Long userId, String string) {
         try {
             BookingState state = BookingState.valueOf(string);
-            User user = userStorage.findById(userId).orElseThrow(
-                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            User user = userStorage.findById(userId).orElseThrow();
             List<Long> userItemsIds = itemStorage.findAllByOwner(user)
                     .stream()
                     .map(Item::getId)
                     .collect(Collectors.toList());
-            List<GetAllBookingsDto> bookingsByOwner;
+            List<BookingForList> bookingsByOwner;
             if (!userItemsIds.isEmpty()) {
                 switch (state) {
                     case ALL:
-                        bookingsByOwner = getAllBookingsStorage.getAllForOwner(userItemsIds);
+                        bookingsByOwner = bookingForListStorage.getAllForOwner(userItemsIds);
                         break;
                     case CURRENT:
-                        bookingsByOwner = getAllBookingsStorage.getCurrentBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingForListStorage.getCurrentBookingsForOwner(userItemsIds);
                         break;
                     case PAST:
-                        bookingsByOwner = getAllBookingsStorage.getPastBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingForListStorage.getPastBookingsForOwner(userItemsIds);
                         break;
                     case FUTURE:
-                        bookingsByOwner = getAllBookingsStorage.getFutureBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingForListStorage.getFutureBookingsForOwner(userItemsIds);
                         break;
                     case WAITING:
-                        bookingsByOwner = getAllBookingsStorage.findBookingByOwnerAndStatusOrderByEndDesc(userItemsIds, BookingStatus.WAITING);
+                        bookingsByOwner = bookingForListStorage.findBookingByOwnerAndStatusOrderByEndDesc(userItemsIds, BookingStatus.WAITING);
                         break;
                     case REJECTED:
-                        bookingsByOwner = getAllBookingsStorage.findBookingByOwnerAndStatusOrderByEndDesc(userItemsIds, BookingStatus.REJECTED);
+                        bookingsByOwner = bookingForListStorage.findBookingByOwnerAndStatusOrderByEndDesc(userItemsIds, BookingStatus.REJECTED);
                         break;
                     default:
                         throw new IllegalArgumentException();
@@ -132,29 +124,29 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    public List<GetAllBookingsDto> getAllBookingsForUserByState(Long userId, String string) {
+    public List<BookingForList> getAllBookingsForUserByState(Long userId, String string) {
         try {
             BookingState state = BookingState.valueOf(string);
-            Long userIdValue = userService.getUser(userId).getId();
-            List<GetAllBookingsDto> bookings = new ArrayList<>();
+            Long userIdValue = userStorage.findById(userId).orElseThrow().getId();
+            List<BookingForList> bookings = new ArrayList<>();
             switch (state) {
                 case ALL:
-                    bookings = getAllBookingsStorage.findAllByBookerOrderByEndDesc(userIdValue);
+                    bookings = bookingForListStorage.findAllByBookerOrderByEndDesc(userIdValue);
                     break;
                 case CURRENT:
-                    bookings = getAllBookingsStorage.getCurrentBookingsForBooker(userIdValue);
+                    bookings = bookingForListStorage.getCurrentBookingsForBooker(userIdValue);
                     break;
                 case PAST:
-                    bookings = getAllBookingsStorage.getPastBookingsForBooker(userIdValue);
+                    bookings = bookingForListStorage.getPastBookingsForBooker(userIdValue);
                     break;
                 case FUTURE:
-                    bookings = getAllBookingsStorage.getFutureBookingsForBooker(userIdValue);
+                    bookings = bookingForListStorage.getFutureBookingsForBooker(userIdValue);
                     break;
                 case WAITING:
-                    bookings = getAllBookingsStorage.findBookingByBookerAndStatusOrderByEndDesc(userIdValue, BookingStatus.WAITING);
+                    bookings = bookingForListStorage.findBookingByBookerAndStatusOrderByEndDesc(userIdValue, BookingStatus.WAITING);
                     break;
                 case REJECTED:
-                    bookings = getAllBookingsStorage.findBookingByBookerAndStatusOrderByEndDesc(userIdValue, BookingStatus.REJECTED);
+                    bookings = bookingForListStorage.findBookingByBookerAndStatusOrderByEndDesc(userIdValue, BookingStatus.REJECTED);
                     break;
             }
             return bookings;

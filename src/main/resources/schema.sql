@@ -2,14 +2,14 @@ DROP TABLE IF EXISTS users, items, bookings, comments;
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(512) UNIQUE NOT NULL
+    name VARCHAR(32) NOT NULL,
+    email VARCHAR(32) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS items (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
+    name VARCHAR(32) NOT NULL,
+    description VARCHAR(32) NOT NULL,
     available BOOLEAN NOT NULL,
     owner BIGINT,
     CONSTRAINT fk_owner FOREIGN KEY (owner) REFERENCES users(id)
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     start TIMESTAMP,
     end_time TIMESTAMP,
-    status VARCHAR(255),
+    status VARCHAR(16),
     item_id BIGINT,
     booker BIGINT,
     FOREIGN KEY (item_id) REFERENCES items(id),

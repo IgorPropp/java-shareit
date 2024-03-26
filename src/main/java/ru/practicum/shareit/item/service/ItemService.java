@@ -19,5 +19,5 @@ public interface ItemService {
 
     List<ItemDto> searchForItem(Long userId, String string);
 
-    CommentDto addComment(Long userId, Long itemId, CommentDto commentDto);
+    CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) throws IllegalAccessException;
 }

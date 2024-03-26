@@ -25,8 +25,7 @@ class UserServiceImpl implements UserService {
     }
 
     public UserDto getUser(Long id) {
-        return UserMapper.toDto(userStorage.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
+        return UserMapper.toDto(userStorage.findById(id).orElseThrow());
     }
 
     public User createUser(User user) {

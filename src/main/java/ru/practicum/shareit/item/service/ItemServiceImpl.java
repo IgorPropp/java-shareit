@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingForList;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingStorage;
+import ru.practicum.shareit.booking.storage.BookingForListStorage;
 import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
@@ -20,9 +22,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,53 +32,62 @@ public class ItemServiceImpl implements ItemService {
     private final UserStorage userStorage;
     private final CommentStorage commentStorage;
     private final BookingStorage bookingStorage;
-    private final ItemMapper itemMapper;
+    private final BookingForListStorage bookingForListStorage;
 
     public List<BookingItemDto> getItems(Long userId) {
-        User user = userStorage.getById(userId);
+        User user = userStorage.findById(userId).orElseThrow();
         List<Item> items = itemStorage.findAllByOwner(user);
+        List<Long> itemIds = items.stream()
+                .map(Item::getId)
+                .collect(Collectors.toList());
+        List<BookingForList> bookings = bookingForListStorage.getAllForOwner(itemIds);
+        List<CommentDto> comments = commentStorage.getByItem_IdIn(itemIds).stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.toList());
         List<BookingItemDto> bookingItems = new ArrayList<>();
         for (Item item : items) {
-            List<CommentDto> comments = commentStorage.getByItem_IdOrderByCreatedDesc(item.getId())
-                    .stream()
-                    .map(CommentMapper::toDto).collect(Collectors.toList());
-            Booking lastBooking = bookingStorage.findFirstByItemIdAndStartBeforeAndStatusIsNotOrderByEndDesc(
-                    item.getId(), LocalDateTime.now(), BookingStatus.REJECTED);
-            Booking nextBooking = bookingStorage.findFirstByItemIdAndStartAfterAndStatusIsNotOrderByEndAsc(
-                    item.getId(), LocalDateTime.now(), BookingStatus.REJECTED);
+            BookingForList lastBooking = bookings.stream()
+                    .filter(booking -> Objects.equals(booking.getItem().getId(), item.getId()))
+                    .filter(booking -> !booking.getStatus().equals(BookingStatus.REJECTED))
+                    .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
+                    .min((o1, o2) -> o2.getStart().compareTo(o1.getStart()))
+                    .orElse(null);
+            BookingForList nextBooking = bookings.stream()
+                    .filter(booking -> Objects.equals(booking.getItem().getId(), item.getId()))
+                    .filter(booking -> !booking.getStatus().equals(BookingStatus.REJECTED))
+                    .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                    .min(Comparator.comparing(BookingForList::getStart))
+                    .orElse(null);
             bookingItems.add(new BookingItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
                     ((lastBooking == null) ? null : new BookingItemDto.Booking(lastBooking.getId(),
-                            lastBooking.getBooker())),
+                            lastBooking.getBooker().getId())),
                     ((nextBooking == null) ? null : new BookingItemDto.Booking(nextBooking.getId(),
-                            nextBooking.getBooker())), comments));
+                            nextBooking.getBooker().getId())), comments));
         }
         bookingItems.sort(Comparator.comparing(BookingItemDto::getId));
         return bookingItems;
     }
 
     public ItemDto createItem(Long userId, ItemDto itemDto) {
-        userStorage.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        Item item = itemMapper.fromDto(itemDto);
-        item.setOwner(userStorage.getById(userId));
+        User user = userStorage.findById(userId).orElseThrow();
+        Item item = ItemMapper.fromDto(itemDto);
+        item.setOwner(user);
         itemStorage.save(item);
         itemDto.setId(item.getId());
         return itemDto;
     }
 
     public void deleteItem(Long userId, Long itemId) {
-        Item item = itemStorage.findById(itemId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Item item = itemStorage.findById(itemId).orElseThrow();
         if (item.getOwner().getId().equals(userId)) {
             itemStorage.deleteById(itemId);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Incorrect user ID or item is not exist");
+            throw new NoSuchElementException("Incorrect user ID or item is not exist");
         }
     }
 
     public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
-        Item item = itemStorage.findById(itemId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Item item = itemStorage.findById(itemId).orElseThrow();
         if (item.getOwner().getId().equals(userId)) {
             if (itemDto.getName() != null) {
                 item.setName(itemDto.getName());
@@ -89,15 +98,14 @@ public class ItemServiceImpl implements ItemService {
             if (itemDto.getAvailable() != null) {
                 item.setAvailable(itemDto.getAvailable());
             }
-            return itemMapper.toDto(itemStorage.save(item));
+            return ItemMapper.toDto(itemStorage.save(item));
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This user doesn't own this item");
+            throw new NoSuchElementException("This user doesn't own this item");
         }
     }
 
     public BookingItemDto getItemDto(Long userId, Long itemId) {
-        Item item = itemStorage.findById(itemId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Item item = itemStorage.findById(itemId).orElseThrow();
         List<CommentDto> comments = commentStorage.getByItem_IdOrderByCreatedDesc(item.getId())
                 .stream()
                 .map(CommentMapper::toDto)
@@ -124,22 +132,20 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
         return itemStorage.findByNameOrDescriptionContainingIgnoreCase(string.toLowerCase()).stream()
-                .map(itemMapper::toDto)
+                .map(ItemMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) {
+    public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) throws IllegalAccessException {
         if (commentDto.getText().isEmpty() || commentDto.getText().isBlank()) {
             throw new IllegalArgumentException("This comment is empty or blank");
         }
-        User user = userStorage.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        Item item = itemStorage.findById(itemId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found"));
+        User user = userStorage.findById(userId).orElseThrow();
+        Item item = itemStorage.findById(itemId).orElseThrow();
         Comment comment = CommentMapper.fromDto(commentDto, item, user);
         List<Booking> booking = bookingStorage.getByBookerIdStatePast(comment.getUser().getId(), LocalDateTime.now());
         if (booking.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user has not booked anything");
+            throw new IllegalAccessException("The user has not booked anything");
         }
         comment.setCreated(LocalDateTime.now());
         commentStorage.save(comment);

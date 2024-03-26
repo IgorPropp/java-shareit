@@ -55,7 +55,7 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                 @PathVariable Long itemId, @RequestBody CommentDto commentDto) {
+                                 @PathVariable Long itemId, @RequestBody CommentDto commentDto) throws IllegalAccessException {
         return itemService.addComment(userId, itemId, commentDto);
     }
 }

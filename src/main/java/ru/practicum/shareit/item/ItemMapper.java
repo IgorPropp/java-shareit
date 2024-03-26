@@ -1,14 +1,26 @@
 package ru.practicum.shareit.item;
 
-import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
-@Mapper(componentModel = "spring")
-public interface ItemMapper {
+@Component
+public class ItemMapper {
 
-    ItemDto toDto(Item item);
+    public static ItemDto toDto(Item item) {
+        return new ItemDto(
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                item.getId()
+        );
+    }
 
-
-    Item fromDto(ItemDto itemDto);
+    public static Item fromDto(ItemDto itemDto) {
+        return new Item(itemDto.getId(),
+                itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getAvailable()
+        );
+    }
 }
