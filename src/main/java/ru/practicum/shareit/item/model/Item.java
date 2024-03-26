@@ -22,6 +22,7 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "owner")
     private User owner;
+
     public Item(Long id, String name, String description, Boolean available) {
         this.id = id;
         this.name = name;
