@@ -14,12 +14,11 @@ public class ItemMapper {
         );
     }
 
-    public static Item fromDto(Long userId, ItemDto itemDto) {
+    public static Item fromDto(ItemDto itemDto) {
         return new Item(itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
-                itemDto.getAvailable(),
-                userId
+                itemDto.getAvailable()
         );
     }
 }
