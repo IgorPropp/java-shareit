@@ -3,8 +3,7 @@ package ru.practicum.shareit.booking;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingForList;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
@@ -19,7 +18,7 @@ public class BookingController {
 
     @PostMapping
     public BookingDto create(@RequestHeader(name = SHARERUSERID) Long userId,
-                             @RequestBody @Valid Booking booking) throws IllegalAccessException {
+                             @RequestBody @Valid BookingDtoRequest booking) throws IllegalAccessException {
         return bookingService.create(userId, booking);
     }
 
@@ -37,13 +36,13 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingForList> getAllBookingForOwner(@RequestHeader(name = SHARERUSERID) Long userId,
+    public List<BookingDto> getAllBookingForOwner(@RequestHeader(name = SHARERUSERID) Long userId,
                                                       @RequestParam(value = "state", defaultValue = "ALL") String state) {
         return bookingService.getAllBookingsByOwner(userId, state);
     }
 
     @GetMapping
-    public List<BookingForList> getAllForUserByState(@RequestHeader(name = SHARERUSERID) Long userId,
+    public List<BookingDto> getAllForUserByState(@RequestHeader(name = SHARERUSERID) Long userId,
                                                      @RequestParam(value = "state",
                                                                 defaultValue = "ALL",
                                                                 required = false) String state) {

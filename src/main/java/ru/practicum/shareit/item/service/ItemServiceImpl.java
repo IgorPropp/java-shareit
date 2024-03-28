@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingForList;
-import ru.practicum.shareit.booking.storage.BookingForListStorage;
 import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.comment.dto.CommentDto;
@@ -30,7 +28,6 @@ public class ItemServiceImpl implements ItemService {
     private final UserStorage userStorage;
     private final CommentStorage commentStorage;
     private final BookingStorage bookingStorage;
-    private final BookingForListStorage bookingForListStorage;
 
     public List<BookingItemDto> getItems(Long userId) {
         User user = userStorage.findById(userId).orElseThrow();
@@ -38,23 +35,23 @@ public class ItemServiceImpl implements ItemService {
         List<Long> itemIds = items.stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
-        List<BookingForList> bookings = bookingForListStorage.getAllForOwner(itemIds);
+        List<Booking> bookings = bookingStorage.getAllForOwner(itemIds);
         List<CommentDto> comments = commentStorage.getByItem_IdIn(itemIds).stream()
                 .map(CommentMapper::toDto)
                 .collect(Collectors.toList());
         List<BookingItemDto> bookingItems = new ArrayList<>();
         for (Item item : items) {
-            BookingForList lastBooking = bookings.stream()
+            Booking lastBooking = bookings.stream()
                     .filter(booking -> Objects.equals(booking.getItem().getId(), item.getId()))
                     .filter(booking -> !booking.getStatus().equals(BookingStatus.REJECTED))
                     .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
                     .min((o1, o2) -> o2.getStart().compareTo(o1.getStart()))
                     .orElse(null);
-            BookingForList nextBooking = bookings.stream()
+            Booking nextBooking = bookings.stream()
                     .filter(booking -> Objects.equals(booking.getItem().getId(), item.getId()))
                     .filter(booking -> !booking.getStatus().equals(BookingStatus.REJECTED))
                     .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
-                    .min(Comparator.comparing(BookingForList::getStart))
+                    .min(Comparator.comparing(Booking::getStart))
                     .orElse(null);
             bookingItems.add(new BookingItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
                     ((lastBooking == null) ? null : new BookingItemDto.Booking(lastBooking.getId(),
@@ -116,9 +113,9 @@ public class ItemServiceImpl implements ItemService {
             return new BookingItemDto(
                     itemId, item.getName(), item.getDescription(), item.getAvailable(),
                     ((lastBooking == null) ? null : new BookingItemDto.Booking(lastBooking.getId(),
-                            lastBooking.getBooker())),
+                            lastBooking.getBooker().getId())),
                     ((nextBooking == null) ? null : new BookingItemDto.Booking(nextBooking.getId(),
-                            nextBooking.getBooker())), comments);
+                            nextBooking.getBooker().getId())), comments);
             } else {
             return new BookingItemDto(itemId, item.getName(), item.getDescription(), item.getAvailable(),
                     null, null, comments);
@@ -141,7 +138,7 @@ public class ItemServiceImpl implements ItemService {
         User user = userStorage.findById(userId).orElseThrow();
         Item item = itemStorage.findById(itemId).orElseThrow();
         Comment comment = CommentMapper.fromDto(commentDto, item, user);
-        List<Booking> booking = bookingStorage.getByBookerIdStatePast(comment.getUser().getId(), LocalDateTime.now());
+        List<Booking> booking = bookingStorage.getByBookerIdStatePast(userId, LocalDateTime.now());
         if (booking.isEmpty()) {
             throw new IllegalAccessException("The user has not booked anything");
         }
