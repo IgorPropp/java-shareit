@@ -8,9 +8,6 @@ import ru.practicum.shareit.user.service.UserService;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "/users")
@@ -28,8 +25,8 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto createUser(@RequestBody @Valid UserDto userDto) {
-        return userService.createUser(userDto);
+    public User createUser(@RequestBody @Valid User user) {
+        return userService.createUser(user);
     }
 
     @DeleteMapping("/{userId}")
