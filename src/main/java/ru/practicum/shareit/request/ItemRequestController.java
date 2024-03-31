@@ -23,29 +23,28 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @PostMapping
-    public ItemRequestResponseDto add(@RequestHeader(HEADER_USER_ID) Long userId,
-                                          @Valid @RequestBody ItemRequestDto requestInDto) {
+    public ItemRequestResponseDto createItemRequest(@RequestHeader(HEADER_USER_ID) Long userId,
+                                                    @Valid @RequestBody ItemRequestDto requestInDto) {
         return itemRequestService.createItemRequest(userId, requestInDto);
     }
 
     @GetMapping()
-    public List<ItemRequestResponseDto> getByOwner(@RequestHeader(HEADER_USER_ID) Long userId) {
+    public List<ItemRequestResponseDto> getItemRequestByOwner(@RequestHeader(HEADER_USER_ID) Long userId) {
         return itemRequestService.getItemRequestByOwner(userId);
     }
 
     @GetMapping("{requestId}")
-    public ItemRequestResponseDto getById(@RequestHeader(HEADER_USER_ID) Long userId,
-                                     @PathVariable Long requestId) {
+    public ItemRequestResponseDto getItemRequestById(@RequestHeader(HEADER_USER_ID) Long userId,
+                                                     @PathVariable Long requestId) {
         return itemRequestService.getItemRequestById(userId, requestId);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestResponseDto> getAll(@RequestHeader(HEADER_USER_ID) Long userId,
-                                          @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero
-                                          Integer from,
-                                          @RequestParam(name = "size", defaultValue = "10") @Positive
-                                          Integer size) {
-        int page = from / size;
-        return itemRequestService.getAllItemRequests(userId, PageRequest.of(page, size));
+    public List<ItemRequestResponseDto> getAllItemRequests(@RequestHeader(HEADER_USER_ID) Long userId,
+                                                           @RequestParam(name = "from", defaultValue = "0")
+                                                           @PositiveOrZero Integer from,
+                                                           @RequestParam(name = "size", defaultValue = "10")
+                                                               @Positive Integer size) {
+        return itemRequestService.getAllItemRequests(userId, PageRequest.of(from / size, size));
     }
 }
