@@ -1,9 +1,17 @@
-DROP TABLE IF EXISTS users, items, bookings, comments;
+DROP TABLE IF EXISTS users, items, bookings, comments, requests;
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     name VARCHAR(32) NOT NULL,
     email VARCHAR(32) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS requests (
+    request_id   BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    description  VARCHAR(500) NOT NULL,
+    requester_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT pk_request PRIMARY KEY (request_id)
 );
 
 CREATE TABLE IF NOT EXISTS items (

@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -79,10 +82,12 @@ public class BookingServiceImpl implements BookingService {
         throw new NoSuchElementException("Booking not found");
     }
 
-    public List<BookingDto> getAllBookingsByOwner(Long userId, String string) {
+    public List<BookingDto> getAllBookingsByOwner(Long userId, String string, int page, int size) {
         try {
             BookingState state = BookingState.valueOf(string);
             User user = userStorage.findById(userId).orElseThrow();
+            Sort sort = Sort.by(Sort.Direction.DESC, "start");
+            Pageable pageRequest = PageRequest.of(page, size, sort);
             List<Long> userItemsIds = itemStorage.findAllByOwner(user)
                     .stream()
                     .map(Item::getId)
@@ -91,24 +96,24 @@ public class BookingServiceImpl implements BookingService {
             if (!userItemsIds.isEmpty()) {
                 switch (state) {
                     case ALL:
-                        bookingsByOwner = bookingStorage.getAllForOwner(userItemsIds);
+                        bookingsByOwner = bookingStorage.getAllForOwner(userItemsIds, pageRequest);
                         break;
                     case CURRENT:
-                        bookingsByOwner = bookingStorage.getCurrentBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingStorage.getCurrentBookingsForOwner(userItemsIds, pageRequest);
                         break;
                     case PAST:
-                        bookingsByOwner = bookingStorage.getPastBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingStorage.getPastBookingsForOwner(userItemsIds, pageRequest);
                         break;
                     case FUTURE:
-                        bookingsByOwner = bookingStorage.getFutureBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingStorage.getFutureBookingsForOwner(userItemsIds, pageRequest);
                         break;
                     case WAITING:
                         bookingsByOwner = bookingStorage.findBookingByOwnerAndStatusOrderByEndDesc(userItemsIds,
-                                BookingStatus.WAITING);
+                                BookingStatus.WAITING, pageRequest);
                         break;
                     case REJECTED:
                         bookingsByOwner = bookingStorage.findBookingByOwnerAndStatusOrderByEndDesc(userItemsIds,
-                                BookingStatus.REJECTED);
+                                BookingStatus.REJECTED, pageRequest);
                         break;
                     default:
                         throw new IllegalArgumentException();
@@ -124,31 +129,33 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    public List<BookingDto> getAllBookingsForUserByState(Long userId, String string) {
+    public List<BookingDto> getAllBookingsForUserByState(Long userId, String string, int page, int size) {
         try {
             BookingState state = BookingState.valueOf(string);
             Long userIdValue = userStorage.findById(userId).orElseThrow().getId();
+            Sort sort = Sort.by(Sort.Direction.DESC, "start");
+            Pageable pageRequest = PageRequest.of(page, size, sort);
             List<Booking> bookings = new ArrayList<>();
             switch (state) {
                 case ALL:
-                    bookings = bookingStorage.findAllByBookerOrderByEndDesc(userIdValue);
+                    bookings = bookingStorage.findAllByBookerOrderByEndDesc(userIdValue, pageRequest);
                     break;
                 case CURRENT:
-                    bookings = bookingStorage.getCurrentBookingsForBooker(userIdValue);
+                    bookings = bookingStorage.getCurrentBookingsForBooker(userIdValue, pageRequest);
                     break;
                 case PAST:
-                    bookings = bookingStorage.getPastBookingsForBooker(userIdValue);
+                    bookings = bookingStorage.getPastBookingsForBooker(userIdValue, pageRequest);
                     break;
                 case FUTURE:
-                    bookings = bookingStorage.getFutureBookingsForBooker(userIdValue);
+                    bookings = bookingStorage.getFutureBookingsForBooker(userIdValue, pageRequest);
                     break;
                 case WAITING:
                     bookings = bookingStorage.findBookingByBookerAndStatusOrderByEndDesc(userIdValue,
-                            BookingStatus.WAITING);
+                            BookingStatus.WAITING, pageRequest);
                     break;
                 case REJECTED:
                     bookings = bookingStorage.findBookingByBookerAndStatusOrderByEndDesc(userIdValue,
-                            BookingStatus.REJECTED);
+                            BookingStatus.REJECTED, pageRequest);
                     break;
             }
             return bookings.stream()

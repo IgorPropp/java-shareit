@@ -1,15 +1,19 @@
 package ru.practicum.shareit.booking;
 
 import lombok.AllArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
+@Validated
 @AllArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
@@ -37,15 +41,21 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingForOwner(@RequestHeader(name = SHARERUSERID) Long userId,
-                                                      @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        return bookingService.getAllBookingsByOwner(userId, state);
+                                                  @RequestParam(defaultValue = "ALL") String state,
+                                                  @RequestParam(name = "from", defaultValue = "0")
+                                                      @PositiveOrZero Integer from,
+                                                  @RequestParam(name = "size", defaultValue = "10")
+                                                      @Positive Integer size) {
+        return bookingService.getAllBookingsByOwner(userId, state, from/size, size);
     }
 
     @GetMapping
     public List<BookingDto> getAllForUserByState(@RequestHeader(name = SHARERUSERID) Long userId,
-                                                     @RequestParam(value = "state",
-                                                                defaultValue = "ALL",
-                                                                required = false) String state) {
-        return bookingService.getAllBookingsForUserByState(userId, state);
+                                                 @RequestParam(defaultValue = "ALL") String state,
+                                                 @RequestParam(name = "from", defaultValue = "0")
+                                                     @PositiveOrZero Integer from,
+                                                 @RequestParam(name = "size", defaultValue = "10")
+                                                     @Positive Integer size) {
+        return bookingService.getAllBookingsForUserByState(userId, state, from/size, size);
     }
 }

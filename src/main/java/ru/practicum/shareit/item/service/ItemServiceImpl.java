@@ -14,6 +14,8 @@ import ru.practicum.shareit.item.dto.BookingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
@@ -28,6 +30,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserStorage userStorage;
     private final CommentStorage commentStorage;
     private final BookingStorage bookingStorage;
+    private final ItemRequestStorage itemRequestStorage;
 
     public List<BookingItemDto> getItems(Long userId) {
         User user = userStorage.findById(userId).orElseThrow();
@@ -65,8 +68,14 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         User user = userStorage.findById(userId).orElseThrow();
+        ItemRequest request = null;
+        if (itemDto.getRequestId() != null) {
+            request = itemRequestStorage.findById(itemDto.getRequestId()).orElseThrow(() ->
+                    new NoSuchElementException(String.format("Запрос с id = %d не найден!", itemDto.getRequestId())));
+        }
         Item item = ItemMapper.fromDto(itemDto);
         item.setOwner(user);
+        item.setRequest(request);
         itemStorage.save(item);
         itemDto.setId(item.getId());
         return itemDto;

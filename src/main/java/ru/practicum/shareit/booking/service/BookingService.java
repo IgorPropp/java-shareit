@@ -12,7 +12,7 @@ public interface BookingService {
 
     BookingDto get(Long bookingId, Long userId) throws IllegalAccessException;
 
-    List<BookingDto> getAllBookingsByOwner(Long userId, String string);
+    List<BookingDto> getAllBookingsByOwner(Long userId, String string, int page, int size);
 
-    List<BookingDto> getAllBookingsForUserByState(Long userId, String string);
+    List<BookingDto> getAllBookingsForUserByState(Long userId, String string, int page, int size);
 }

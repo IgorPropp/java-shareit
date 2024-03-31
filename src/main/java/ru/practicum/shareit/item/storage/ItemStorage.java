@@ -16,4 +16,6 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
             " AND i.available = true")
     List<Item> findByNameOrDescriptionContainingIgnoreCase(String string);
 
+    @Query("SELECT i FROM Item i WHERE i.request.id = :id")
+    List<Item> findAllByRequestId(Long id);
 }
