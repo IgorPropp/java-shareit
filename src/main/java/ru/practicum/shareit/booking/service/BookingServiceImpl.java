@@ -35,22 +35,25 @@ public class BookingServiceImpl implements BookingService {
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
     private final BookingStorage bookingStorage;
+    private final BookingMapper bookingMapper;
+    private final UserMapper userMapper;
+    private final ItemMapper itemMapper;
 
     public BookingDto create(Long userId, BookingDtoRequest bookingDtoRequest) throws IllegalAccessException {
         if (!bookingDatesAreValid(bookingDtoRequest)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking time is incorrect");
         }
-        UserDto userDto = UserMapper.toDto(userStorage.findById(userId).orElseThrow());
-        ItemDto itemDto = ItemMapper.toDto(itemStorage.findById(bookingDtoRequest.getItemId()).orElseThrow());
+        UserDto userDto = userMapper.toDto(userStorage.findById(userId).orElseThrow());
+        ItemDto itemDto = itemMapper.toDto(itemStorage.findById(bookingDtoRequest.getItemId()).orElseThrow());
         if (itemStorage.getById(bookingDtoRequest.getItemId()).getOwner().getId().equals(userId))
             throw new NoSuchElementException("Booker is the owner");
         if (itemDto.getAvailable().equals(false)) {
             throw new IllegalAccessException("Item is unavailable");
         }
-        Booking booking = BookingMapper.requestToObject(bookingDtoRequest, ItemMapper.fromDto(itemDto),
-                UserMapper.fromDto(userDto.getId(), userDto), BookingStatus.WAITING);
+        Booking booking = bookingMapper.requestToObject(bookingDtoRequest, itemMapper.fromDto(itemDto),
+                userMapper.fromDto(userDto.getId(), userDto), BookingStatus.WAITING);
         bookingStorage.save(booking);
-        return BookingMapper.toDto(booking, itemDto, userDto);
+        return bookingMapper.toDto(booking, itemDto, userDto);
     }
 
     public BookingDto book(Long userId, Long bookingId, Boolean approved) throws IllegalAccessException {
@@ -67,7 +70,7 @@ public class BookingServiceImpl implements BookingService {
                 booking.setStatus(BookingStatus.REJECTED);
             }
             bookingStorage.save(booking);
-            return BookingMapper.toDto(booking, ItemMapper.toDto(item), UserMapper.toDto(booker));
+            return bookingMapper.toDto(booking, itemMapper.toDto(item), userMapper.toDto(booker));
         }
         throw new NoSuchElementException("Booking not found");
     }
@@ -77,7 +80,7 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemStorage.findById(booking.getItem().getId()).orElseThrow();
         User user = userStorage.findById(booking.getBooker().getId()).orElseThrow();
         if (booking.getBooker().getId().equals(userId) || item.getOwner().getId().equals(userId)) {
-            return BookingMapper.toDto(booking, ItemMapper.toDto(item), UserMapper.toDto(user));
+            return bookingMapper.toDto(booking, itemMapper.toDto(item), userMapper.toDto(user));
         }
         throw new NoSuchElementException("Booking not found");
     }
@@ -122,7 +125,7 @@ public class BookingServiceImpl implements BookingService {
                 throw new IllegalStateException("User has no items");
             }
             return bookingsByOwner.stream()
-                    .map(BookingMapper::toDto)
+                    .map(bookingMapper::toDto)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: UNSUPPORTED_STATUS");
@@ -159,7 +162,7 @@ public class BookingServiceImpl implements BookingService {
                     break;
             }
             return bookings.stream()
-                    .map(BookingMapper::toDto)
+                    .map(bookingMapper::toDto)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: UNSUPPORTED_STATUS");
@@ -171,5 +174,4 @@ public class BookingServiceImpl implements BookingService {
                 !booking.getEnd().isBefore(booking.getStart()) && booking.getStart() != booking.getEnd() &&
                 !booking.getStart().equals(booking.getEnd()) && !booking.getStart().isBefore(LocalDateTime.now());
     }
-
 }

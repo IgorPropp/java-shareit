@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.enums.BookingStatus;
@@ -11,9 +13,13 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 
+@AllArgsConstructor
+@Component
 public class BookingMapper {
+    private final ItemMapper itemMapper;
+    private final UserMapper userMapper;
 
-    public static Booking fromDto(BookingDto bookingDto) {
+    public Booking fromDto(BookingDto bookingDto) {
         if (bookingDto == null) {
             throw new IllegalStateException();
         }
@@ -22,14 +28,14 @@ public class BookingMapper {
         booking.setStart(bookingDto.getStart());
         booking.setEnd(bookingDto.getEnd());
         booking.setStatus(bookingDto.getStatus());
-        booking.setItem(ItemMapper.fromDto(bookingDto.getItem()));
-        booking.setBooker(UserMapper.fromDto(bookingDto.getBooker().getId(), bookingDto.getBooker()));
+        booking.setItem(itemMapper.fromDto(bookingDto.getItem()));
+        booking.setBooker(userMapper.fromDto(bookingDto.getBooker().getId(), bookingDto.getBooker()));
         return booking;
     }
 
-    public static BookingDto toDto(Booking booking, ItemDto itemDto, UserDto userDto) {
+    public BookingDto toDto(Booking booking, ItemDto itemDto, UserDto userDto) {
         if (booking == null) {
-            throw new IllegalStateException();
+            return null;
         }
         BookingDto bookingDto = new BookingDto();
         bookingDto.setId(booking.getId());
@@ -41,21 +47,21 @@ public class BookingMapper {
         return bookingDto;
     }
 
-    public static BookingDto toDto(Booking booking) {
+    public BookingDto toDto(Booking booking) {
         BookingDto bookingDto = new BookingDto();
         bookingDto.setId(booking.getId());
         bookingDto.setStart(booking.getStart());
         bookingDto.setEnd(booking.getEnd());
         bookingDto.setStatus(booking.getStatus());
-        bookingDto.setItem(ItemMapper.toDto(booking.getItem()));
-        bookingDto.setBooker(UserMapper.toDto(booking.getBooker()));
+        bookingDto.setItem(itemMapper.toDto(booking.getItem()));
+        bookingDto.setBooker(userMapper.toDto(booking.getBooker()));
         return bookingDto;
     }
 
-    public static Booking requestToObject(BookingDtoRequest bookingDtoRequest, Item item,
+    public Booking requestToObject(BookingDtoRequest bookingDtoRequest, Item item,
                                           User user, BookingStatus status) {
         if (bookingDtoRequest == null) {
-            throw new IllegalStateException();
+            return null;
         }
         Booking booking = new Booking();
         booking.setStart(bookingDtoRequest.getStart());
@@ -64,5 +70,13 @@ public class BookingMapper {
         booking.setItem(item);
         booking.setBooker(user);
         return booking;
+    }
+
+    public BookingDtoRequest objectToRequest(Booking booking) {
+        BookingDtoRequest bdr = new BookingDtoRequest();
+        bdr.setItemId(booking.getId());
+        bdr.setStart(booking.getStart());
+        bdr.setEnd(booking.getEnd());
+        return bdr;
     }
 }

@@ -31,6 +31,8 @@ public class ItemServiceImpl implements ItemService {
     private final CommentStorage commentStorage;
     private final BookingStorage bookingStorage;
     private final ItemRequestStorage itemRequestStorage;
+    private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
 
     public List<BookingItemDto> getItems(Long userId) {
         User user = userStorage.findById(userId).orElseThrow();
@@ -40,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
         List<Booking> bookings = bookingStorage.getAllForOwner(itemIds);
         List<CommentDto> comments = commentStorage.getByItem_IdIn(itemIds).stream()
-                .map(CommentMapper::toDto)
+                .map(commentMapper::toDto)
                 .collect(Collectors.toList());
         List<BookingItemDto> bookingItems = new ArrayList<>();
         for (Item item : items) {
@@ -73,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
             request = itemRequestStorage.findById(itemDto.getRequestId()).orElseThrow(() ->
                     new NoSuchElementException(String.format("Запрос с id = %d не найден!", itemDto.getRequestId())));
         }
-        Item item = ItemMapper.fromDto(itemDto);
+        Item item = itemMapper.fromDto(itemDto);
         item.setOwner(user);
         item.setRequest(request);
         itemStorage.save(item);
@@ -102,7 +104,7 @@ public class ItemServiceImpl implements ItemService {
             if (itemDto.getAvailable() != null) {
                 item.setAvailable(itemDto.getAvailable());
             }
-            return ItemMapper.toDto(itemStorage.save(item));
+            return itemMapper.toDto(itemStorage.save(item));
         } else {
             throw new NoSuchElementException("This user doesn't own this item");
         }
@@ -112,7 +114,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemStorage.findById(itemId).orElseThrow();
         List<CommentDto> comments = commentStorage.getByItem_IdOrderByCreatedDesc(item.getId())
                 .stream()
-                .map(CommentMapper::toDto)
+                .map(commentMapper::toDto)
                 .collect(Collectors.toList());
         if (item.getOwner().getId().equals(userId)) {
             Booking lastBooking = bookingStorage.findFirstByItemIdAndStartBeforeAndStatusIsNotOrderByEndDesc(
@@ -136,7 +138,7 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
         return itemStorage.findByNameOrDescriptionContainingIgnoreCase(string.toLowerCase()).stream()
-                .map(ItemMapper::toDto)
+                .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -146,13 +148,13 @@ public class ItemServiceImpl implements ItemService {
         }
         User user = userStorage.findById(userId).orElseThrow();
         Item item = itemStorage.findById(itemId).orElseThrow();
-        Comment comment = CommentMapper.fromDto(commentDto, item, user);
+        Comment comment = commentMapper.fromDto(commentDto, item, user);
         List<Booking> booking = bookingStorage.getByBookerIdStatePast(userId, LocalDateTime.now());
         if (booking.isEmpty()) {
             throw new IllegalAccessException("The user has not booked anything");
         }
         comment.setCreated(LocalDateTime.now());
         commentStorage.save(comment);
-        return CommentMapper.toDto(comment);
+        return commentMapper.toDto(comment);
     }
 }

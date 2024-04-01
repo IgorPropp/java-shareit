@@ -23,12 +23,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestStorage itemRequestStorage;
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
+    private final ItemRequestMapper itemRequestMapper;
 
     public ItemRequestResponseDto createItemRequest(Long userId, ItemRequestDto itemRequestDto) {
         User requester = userStorage.findById(userId).orElseThrow();
-        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, requester);
+        ItemRequest itemRequest = itemRequestMapper.toItemRequest(itemRequestDto, requester);
         itemRequestStorage.save(itemRequest);
-        return ItemRequestMapper.toItemRequestOutDto(itemRequest, List.of());
+        return itemRequestMapper.toItemRequestOutDto(itemRequest, List.of());
     }
 
     public List<ItemRequestResponseDto> getItemRequestByOwner(Long userId) {
@@ -47,14 +48,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         userStorage.findById(userId).orElseThrow();
         ItemRequest itemRequest = itemRequestStorage.findById(requestId).orElseThrow(() ->
                 new NoSuchElementException(String.format("Запрос с id = %s не найден!", requestId)));
-        return ItemRequestMapper.toItemRequestOutDto(itemRequest,
+        return itemRequestMapper.toItemRequestOutDto(itemRequest,
                 itemStorage.findAllByRequestId(itemRequest.getId()));
     }
 
     private List<ItemRequestResponseDto> toListResponseDto(List<ItemRequest> requests) {
         List<ItemRequestResponseDto> requestsOut;
         requestsOut = requests.stream()
-                .map(request -> ItemRequestMapper.toItemRequestOutDto(request,
+                .map(request -> itemRequestMapper.toItemRequestOutDto(request,
                         itemStorage.findAllByRequestId(request.getId())))
                 .collect(Collectors.toList());
         return requestsOut;
