@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Component
 public class ItemRequestMapper {
     private final ItemMapper itemMapper;
+
     public ItemRequestResponseDto toItemRequestOutDto(ItemRequest itemRequest, List<Item> items) {
         return new ItemRequestResponseDto(
                 itemRequest.getId(),

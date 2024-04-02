@@ -46,7 +46,7 @@ public class BookingController {
                                                       @PositiveOrZero Integer from,
                                                   @RequestParam(name = "size", defaultValue = "10")
                                                       @Positive Integer size) {
-        return bookingService.getAllBookingsByOwner(userId, state, from/size, size);
+        return bookingService.getAllBookingsByOwner(userId, state, from / size, size);
     }
 
     @GetMapping
@@ -56,6 +56,6 @@ public class BookingController {
                                                      @PositiveOrZero Integer from,
                                                  @RequestParam(name = "size", defaultValue = "10")
                                                      @Positive Integer size) {
-        return bookingService.getAllBookingsForUserByState(userId, state, from/size, size);
+        return bookingService.getAllBookingsForUserByState(userId, state, from / size, size);
     }
 }
