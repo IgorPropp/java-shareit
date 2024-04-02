@@ -1,0 +1,220 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1251"> 
+  <title>Coverage Report > BookingMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.practicum.shareit.booking</a>
+</div>
+
+<h1>Coverage Summary for Class: BookingMapper (ru.practicum.shareit.booking)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BookingMapper</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (30/42)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">BookingMapper$MockitoMock$MBtRzC2s</td>
+  </tr>
+  <tr>
+    <td class="name">BookingMapper$MockitoMock$MBtRzC2s$auxiliary$2N6Guqcs</td>
+  </tr>
+  <tr>
+    <td class="name">BookingMapper$MockitoMock$MBtRzC2s$auxiliary$BdIYzXod</td>
+  </tr>
+  <tr>
+    <td class="name">BookingMapper$MockitoMock$MBtRzC2s$auxiliary$g0dDsqsE</td>
+  </tr>
+  <tr>
+    <td class="name">BookingMapper$MockitoMock$MBtRzC2s$auxiliary$LMM8aZr7</td>
+  </tr>
+  <tr>
+    <td class="name">BookingMapper$MockitoMock$MBtRzC2s$auxiliary$mAFBnjVv</td>
+  </tr>
+  <tr>
+    <td class="name">BookingMapper$MockitoMock$MBtRzC2s$auxiliary$tk7lj5p6</td>
+  </tr>
+  <tr>
+    <td class="name">BookingMapper$MockitoMock$MBtRzC2s$auxiliary$WtWQs6pY</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (30/42)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.practicum.shareit.booking;
+&nbsp;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import ru.practicum.shareit.booking.dto.BookingDto;
+&nbsp;import ru.practicum.shareit.booking.dto.BookingDtoRequest;
+&nbsp;import ru.practicum.shareit.booking.enums.BookingStatus;
+&nbsp;import ru.practicum.shareit.booking.model.Booking;
+&nbsp;import ru.practicum.shareit.item.ItemMapper;
+&nbsp;import ru.practicum.shareit.item.dto.ItemDto;
+&nbsp;import ru.practicum.shareit.item.model.Item;
+&nbsp;import ru.practicum.shareit.user.User;
+&nbsp;import ru.practicum.shareit.user.UserMapper;
+&nbsp;import ru.practicum.shareit.user.dto.UserDto;
+&nbsp;
+&nbsp;@AllArgsConstructor
+&nbsp;@Component
+&nbsp;public class BookingMapper {
+&nbsp;    @Autowired
+&nbsp;    private final ItemMapper itemMapper;
+&nbsp;    @Autowired
+&nbsp;    private final UserMapper userMapper;
+&nbsp;
+&nbsp;    public Booking fromDto(BookingDto bookingDto) {
+<b class="nc">&nbsp;        if (bookingDto == null) {</b>
+<b class="nc">&nbsp;            throw new IllegalStateException();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Booking booking = new Booking();</b>
+<b class="nc">&nbsp;        booking.setId(bookingDto.getId());</b>
+<b class="nc">&nbsp;        booking.setStart(bookingDto.getStart());</b>
+<b class="nc">&nbsp;        booking.setEnd(bookingDto.getEnd());</b>
+<b class="nc">&nbsp;        booking.setStatus(bookingDto.getStatus());</b>
+<b class="nc">&nbsp;        booking.setItem(itemMapper.fromDto(bookingDto.getItem()));</b>
+<b class="nc">&nbsp;        booking.setBooker(userMapper.fromDto(bookingDto.getBooker().getId(), bookingDto.getBooker()));</b>
+<b class="nc">&nbsp;        return booking;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public BookingDto toDto(Booking booking, ItemDto itemDto, UserDto userDto) {
+<b class="fc">&nbsp;        if (booking == null) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        BookingDto bookingDto = new BookingDto();</b>
+<b class="fc">&nbsp;        bookingDto.setId(booking.getId());</b>
+<b class="fc">&nbsp;        bookingDto.setStart(booking.getStart());</b>
+<b class="fc">&nbsp;        bookingDto.setEnd(booking.getEnd());</b>
+<b class="fc">&nbsp;        bookingDto.setStatus(booking.getStatus());</b>
+<b class="fc">&nbsp;        bookingDto.setItem(itemDto);</b>
+<b class="fc">&nbsp;        bookingDto.setBooker(userDto);</b>
+<b class="fc">&nbsp;        return bookingDto;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public BookingDto toDto(Booking booking) {
+<b class="fc">&nbsp;        BookingDto bookingDto = new BookingDto();</b>
+<b class="fc">&nbsp;        bookingDto.setId(booking.getId());</b>
+<b class="fc">&nbsp;        bookingDto.setStart(booking.getStart());</b>
+<b class="fc">&nbsp;        bookingDto.setEnd(booking.getEnd());</b>
+<b class="fc">&nbsp;        bookingDto.setStatus(booking.getStatus());</b>
+<b class="fc">&nbsp;        bookingDto.setItem(itemMapper.toDto(booking.getItem()));</b>
+<b class="fc">&nbsp;        bookingDto.setBooker(userMapper.toDto(booking.getBooker()));</b>
+<b class="fc">&nbsp;        return bookingDto;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Booking requestToObject(BookingDtoRequest bookingDtoRequest, Item item,
+&nbsp;                                          User user, BookingStatus status) {
+<b class="fc">&nbsp;        if (bookingDtoRequest == null) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Booking booking = new Booking();</b>
+<b class="fc">&nbsp;        booking.setStart(bookingDtoRequest.getStart());</b>
+<b class="fc">&nbsp;        booking.setEnd(bookingDtoRequest.getEnd());</b>
+<b class="fc">&nbsp;        booking.setStatus(status);</b>
+<b class="fc">&nbsp;        booking.setItem(item);</b>
+<b class="fc">&nbsp;        booking.setBooker(user);</b>
+<b class="fc">&nbsp;        return booking;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public BookingDtoRequest objectToRequest(Booking booking) {
+<b class="fc">&nbsp;        BookingDtoRequest bdr = new BookingDtoRequest();</b>
+<b class="fc">&nbsp;        bdr.setItemId(booking.getId());</b>
+<b class="fc">&nbsp;        bdr.setStart(booking.getStart());</b>
+<b class="fc">&nbsp;        bdr.setEnd(booking.getEnd());</b>
+<b class="fc">&nbsp;        return bdr;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-04-02 20:43</div>
+</div>
+</body>
+</html>

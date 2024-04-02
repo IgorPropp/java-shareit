@@ -1,0 +1,179 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1251"> 
+  <title>Coverage Report > ItemRequestController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.practicum.shareit.request</a>
+</div>
+
+<h1>Coverage Summary for Class: ItemRequestController (ru.practicum.shareit.request)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ItemRequestController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ItemRequestController$$EnhancerBySpringCGLIB$$8022b55f</td>
+  </tr>
+  <tr>
+    <td class="name">ItemRequestController$$EnhancerBySpringCGLIB$$8022b55f_2</td>
+  </tr>
+  <tr>
+    <td class="name">ItemRequestController$$EnhancerBySpringCGLIB$$8022b55f_3</td>
+  </tr>
+  <tr>
+    <td class="name">ItemRequestController$$EnhancerBySpringCGLIB$$8022b55f_3$$FastClassBySpringCGLIB$$5d00c88b</td>
+  </tr>
+  <tr>
+    <td class="name">ItemRequestController$$EnhancerBySpringCGLIB$$8022b55f_4</td>
+  </tr>
+  <tr>
+    <td class="name">ItemRequestController$$FastClassBySpringCGLIB$$b97806be</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.practicum.shareit.request;
+&nbsp;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.validation.annotation.Validated;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import ru.practicum.shareit.request.dto.ItemRequestDto;
+&nbsp;import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
+&nbsp;import ru.practicum.shareit.request.service.ItemRequestService;
+&nbsp;
+&nbsp;import javax.validation.Valid;
+&nbsp;import javax.validation.constraints.Positive;
+&nbsp;import javax.validation.constraints.PositiveOrZero;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@RequiredArgsConstructor
+&nbsp;@RestController
+&nbsp;@Validated
+&nbsp;@RequestMapping(path = &quot;/requests&quot;)
+&nbsp;public class ItemRequestController {
+&nbsp;
+&nbsp;    private static final String HEADER_USER_ID = &quot;X-Sharer-User-Id&quot;;
+&nbsp;    private final ItemRequestService itemRequestService;
+&nbsp;
+&nbsp;    @PostMapping
+&nbsp;    public ItemRequestResponseDto createItemRequest(@RequestHeader(HEADER_USER_ID) Long userId,
+&nbsp;                                                    @Valid @RequestBody ItemRequestDto requestInDto) {
+<b class="fc">&nbsp;        return itemRequestService.createItemRequest(userId, requestInDto);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping()
+&nbsp;    public List&lt;ItemRequestResponseDto&gt; getItemRequestByOwner(@RequestHeader(HEADER_USER_ID) Long userId) {
+<b class="fc">&nbsp;        return itemRequestService.getItemRequestByOwner(userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;{requestId}&quot;)
+&nbsp;    public ItemRequestResponseDto getItemRequestById(@RequestHeader(HEADER_USER_ID) Long userId,
+&nbsp;                                                     @PathVariable Long requestId) {
+<b class="fc">&nbsp;        return itemRequestService.getItemRequestById(userId, requestId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/all&quot;)
+&nbsp;    public List&lt;ItemRequestResponseDto&gt; getAllItemRequests(@RequestHeader(HEADER_USER_ID) Long userId,
+&nbsp;                                                           @RequestParam(name = &quot;from&quot;, defaultValue = &quot;0&quot;)
+&nbsp;                                                           @PositiveOrZero Integer from,
+&nbsp;                                                           @RequestParam(name = &quot;size&quot;, defaultValue = &quot;10&quot;)
+&nbsp;                                                               @Positive Integer size) {
+<b class="fc">&nbsp;        return itemRequestService.getAllItemRequests(userId, PageRequest.of(from / size, size));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-04-02 20:43</div>
+</div>
+</body>
+</html>

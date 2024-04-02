@@ -1,0 +1,156 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1251"> 
+  <title>Coverage Report > CommentMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.practicum.shareit.comment</a>
+</div>
+
+<h1>Coverage Summary for Class: CommentMapper (ru.practicum.shareit.comment)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CommentMapper</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CommentMapper$MockitoMock$s1BRiIZb</td>
+  </tr>
+  <tr>
+    <td class="name">CommentMapper$MockitoMock$s1BRiIZb$auxiliary$i6zrUCoA</td>
+  </tr>
+  <tr>
+    <td class="name">CommentMapper$MockitoMock$s1BRiIZb$auxiliary$p55tkASf</td>
+  </tr>
+  <tr>
+    <td class="name">CommentMapper$MockitoMock$s1BRiIZb$auxiliary$uEhqRhki</td>
+  </tr>
+  <tr>
+    <td class="name">CommentMapper$MockitoMock$s1BRiIZb$auxiliary$YyxoBNF8</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.practicum.shareit.comment;
+&nbsp;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import ru.practicum.shareit.comment.dto.CommentDto;
+&nbsp;import ru.practicum.shareit.comment.model.Comment;
+&nbsp;import ru.practicum.shareit.item.model.Item;
+&nbsp;import ru.practicum.shareit.user.User;
+&nbsp;
+&nbsp;@NoArgsConstructor
+&nbsp;@Component
+&nbsp;public class CommentMapper {
+&nbsp;    public CommentDto toDto(Comment comment) {
+<b class="nc">&nbsp;        return new CommentDto(</b>
+<b class="nc">&nbsp;                comment.getId(),</b>
+<b class="nc">&nbsp;                comment.getText(),</b>
+<b class="nc">&nbsp;                comment.getUser().getName(),</b>
+<b class="nc">&nbsp;                comment.getCreated()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    public Comment fromDto(CommentDto commentDto, Item item, User user) {
+<b class="nc">&nbsp;        return new Comment(</b>
+<b class="nc">&nbsp;                commentDto.getId(),</b>
+<b class="nc">&nbsp;                commentDto.getText(),</b>
+&nbsp;                item,
+&nbsp;                user,
+<b class="nc">&nbsp;                commentDto.getCreated());</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-04-02 20:43</div>
+</div>
+</body>
+</html>

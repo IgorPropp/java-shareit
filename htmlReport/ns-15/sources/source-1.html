@@ -1,0 +1,147 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1251"> 
+  <title>Coverage Report > BookingStorage</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.practicum.shareit.booking.storage</a>
+</div>
+
+<h1>Coverage Summary for Class: BookingStorage (ru.practicum.shareit.booking.storage)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">BookingStorage$MockitoMock$e4hy2jJf</td>
+  </tr>
+  <tr>
+    <td class="name">BookingStorage$MockitoMock$e4hy2jJf$auxiliary$geqJOQOP</td>
+  </tr>
+  <tr>
+    <td class="name">BookingStorage$MockitoMock$e4hy2jJf$auxiliary$SYpREkOU</td>
+  </tr>
+  <tr>
+    <td class="name">BookingStorage$MockitoMock$e4hy2jJf$auxiliary$vYp87Mpn</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.practicum.shareit.booking.storage;
+&nbsp;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import ru.practicum.shareit.booking.enums.BookingStatus;
+&nbsp;import ru.practicum.shareit.booking.model.Booking;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public interface BookingStorage extends JpaRepository&lt;Booking, Long&gt; {
+&nbsp;    Booking findFirstByItemIdAndStartBeforeAndStatusIsNotOrderByEndDesc(Long itemId, LocalDateTime end,
+&nbsp;                                                                        BookingStatus status);
+&nbsp;
+&nbsp;    Booking findFirstByItemIdAndStartAfterAndStatusIsNotOrderByEndAsc(Long itemId, LocalDateTime start,
+&nbsp;                                                                      BookingStatus status);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b &quot; +
+&nbsp;            &quot;WHERE b.booker.id = :id AND b.end &lt; :currentTime AND upper(b.status) = UPPER(&#39;APPROVED&#39;) &quot; +
+&nbsp;            &quot;ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getByBookerIdStatePast(@Param(&quot;id&quot;) Long id, @Param(&quot;currentTime&quot;) LocalDateTime currentTime);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.booker.id = :owner ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; findAllByBookerOrderByEndDesc(@Param(&quot;owner&quot;) Long owner, Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.booker.id = :booker AND b.status = :status ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; findBookingByBookerAndStatusOrderByEndDesc(@Param(&quot;booker&quot;) Long booker,
+&nbsp;                                                             @Param(&quot;status&quot;) BookingStatus status,
+&nbsp;                                                             Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.booker.id = :userId AND b.end &gt; CURRENT_TIMESTAMP &quot; +
+&nbsp;            &quot;AND b.start &lt; CURRENT_TIMESTAMP ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getCurrentBookingsForBooker(@Param(&quot;userId&quot;) Long userId, Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.booker.id = :userId AND b.end &lt; CURRENT_TIMESTAMP &quot; +
+&nbsp;            &quot;AND b.start &lt; CURRENT_TIMESTAMP ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getPastBookingsForBooker(@Param(&quot;userId&quot;) Long userId, Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.booker.id = :userId AND b.start &gt;= CURRENT_TIMESTAMP &quot; +
+&nbsp;            &quot;AND b.end &gt; CURRENT_TIMESTAMP ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getFutureBookingsForBooker(@Param(&quot;userId&quot;) Long userId, Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.item.id IN :itemsId ORDER BY b.end DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getAllForOwner(List&lt;Long&gt; itemsId, Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.item.id IN :itemsId ORDER BY b.end DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getAllForOwner(List&lt;Long&gt; itemsId);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.item.id IN :itemsId AND b.end &gt; CURRENT_TIMESTAMP &quot; +
+&nbsp;            &quot;AND b.start &lt; CURRENT_TIMESTAMP ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getCurrentBookingsForOwner(@Param(&quot;itemsId&quot;) List&lt;Long&gt; itemsId, Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.item.id IN :itemsId AND b.end &lt; CURRENT_TIMESTAMP &quot; +
+&nbsp;            &quot;AND b.start &lt; CURRENT_TIMESTAMP ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getPastBookingsForOwner(@Param(&quot;itemsId&quot;) List&lt;Long&gt; itemsId, Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.item.id IN :itemsId AND b.start &gt;= CURRENT_TIMESTAMP &quot; +
+&nbsp;            &quot;ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; getFutureBookingsForOwner(@Param(&quot;itemsId&quot;) List&lt;Long&gt; itemsId, Pageable pageRequest);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT b FROM Booking b WHERE b.item.id IN :itemsId AND b.status = :status ORDER BY b.start DESC&quot;)
+&nbsp;    List&lt;Booking&gt; findBookingByOwnerAndStatusOrderByEndDesc(@Param(&quot;itemsId&quot;) List&lt;Long&gt; itemsId,
+&nbsp;                                                            @Param(&quot;status&quot;) BookingStatus status,
+&nbsp;                                                            Pageable pageRequest);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-04-02 20:43</div>
+</div>
+</body>
+</html>

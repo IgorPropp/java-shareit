@@ -1,0 +1,95 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1251"> 
+  <title>Coverage Report > ItemRequestStorage</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.practicum.shareit.request.storage</a>
+</div>
+
+<h1>Coverage Summary for Class: ItemRequestStorage (ru.practicum.shareit.request.storage)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">ItemRequestStorage$MockitoMock$UdSSPpVD</td>
+  </tr>
+  <tr>
+    <td class="name">ItemRequestStorage$MockitoMock$UdSSPpVD$auxiliary$4vmGDVWu</td>
+  </tr>
+  <tr>
+    <td class="name">ItemRequestStorage$MockitoMock$UdSSPpVD$auxiliary$QJSI8hHk</td>
+  </tr>
+  <tr>
+    <td class="name">ItemRequestStorage$MockitoMock$UdSSPpVD$auxiliary$rWnfglyr</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.practicum.shareit.request.storage;
+&nbsp;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import ru.practicum.shareit.request.ItemRequest;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public interface ItemRequestStorage extends JpaRepository&lt;ItemRequest, Long&gt; {
+&nbsp;    List&lt;ItemRequest&gt; findAllByRequesterIdOrderByCreatedDesc(Long userId);
+&nbsp;
+&nbsp;    @Query(&quot;select r from ItemRequest r where r.requester.id &lt;&gt; ?1&quot;)
+&nbsp;    List&lt;ItemRequest&gt; findAllByOtherUsers(Long userId, Pageable pageable);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-04-02 20:43</div>
+</div>
+</body>
+</html>
