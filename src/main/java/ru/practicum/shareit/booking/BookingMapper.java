@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
@@ -16,7 +17,9 @@ import ru.practicum.shareit.user.dto.UserDto;
 @AllArgsConstructor
 @Component
 public class BookingMapper {
+    @Autowired
     private final ItemMapper itemMapper;
+    @Autowired
     private final UserMapper userMapper;
 
     public Booking fromDto(BookingDto bookingDto) {

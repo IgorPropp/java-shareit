@@ -20,12 +20,6 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b " +
             "WHERE b.booker.id = :id AND b.end < :currentTime AND upper(b.status) = UPPER('APPROVED') " +
             "ORDER BY b.start DESC")
-    List<Booking> getByBookerIdStatePast(@Param("id") Long id, @Param("currentTime") LocalDateTime currentTime,
-                                         Pageable pageRequest);
-
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.booker.id = :id AND b.end < :currentTime AND upper(b.status) = UPPER('APPROVED') " +
-            "ORDER BY b.start DESC")
     List<Booking> getByBookerIdStatePast(@Param("id") Long id, @Param("currentTime") LocalDateTime currentTime);
 
     @Query("SELECT b FROM Booking b WHERE b.booker.id = :owner ORDER BY b.start DESC")

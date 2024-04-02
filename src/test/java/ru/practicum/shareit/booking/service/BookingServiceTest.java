@@ -1,13 +1,10 @@
 package ru.practicum.shareit.booking.service;
 
-import org.hibernate.mapping.Any;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
@@ -21,14 +18,13 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -40,8 +36,6 @@ public class BookingServiceTest {
     private BookingStorage bookingStorage;
     @Mock
     private BookingMapper bookingMapper;
-    @Mock
-    private UserService userService;
     @Mock
     private ItemMapper itemMapper;
     @Mock
@@ -65,7 +59,6 @@ public class BookingServiceTest {
         userDto = new UserDto(1L, "userName", "user@email.ru");
         itemDto = new ItemDto("item1", "description1", true, 1L, null);
         user = new User(1L, "user name", "user@email.ru");
-        User user2 = new User(1L, "user name", "user@email.ru");
         item = new Item(1L, "item1", "description1", true, user, null);
         bookingDto = new BookingDto(1L,
                 LocalDateTime.of(2024, 6, 1, 0, 0, 0),
@@ -114,7 +107,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void testGet() {
+    void testGet() throws IllegalAccessException {
         when(bookingStorage.findById(anyLong())).thenReturn(Optional.of(booking));
         when(userStorage.findById(anyLong())).thenReturn(Optional.of(user));
         when(itemStorage.findById(anyLong())).thenReturn(Optional.of(item));
@@ -142,7 +135,6 @@ public class BookingServiceTest {
         List<BookingDto> bookings = bookingService.getAllBookingsByOwner(1L,"ALL", 10, 10);
         assertEquals(bookings, List.of(bookingDto));
         verify(bookingStorage, times(1)).getAllForOwner(any(), any());
-
 
         bookings = bookingService.getAllBookingsByOwner(1L,"CURRENT", 10, 10);
         assertEquals(bookings, List.of(bookingDto));
