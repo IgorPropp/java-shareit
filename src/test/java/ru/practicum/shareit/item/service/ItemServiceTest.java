@@ -1,12 +1,10 @@
 package ru.practicum.shareit.item.service;
 
-import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingStorage;
@@ -74,7 +72,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void testCreateItem() throws IllegalAccessException {
+    void testCreateItem() {
         when(userStorage.findById(anyLong())).thenReturn(Optional.of(user));
         when(itemRequestStorage.findById(anyLong())).thenReturn(Optional.of(itemRequest));
         when(itemStorage.save(item)).thenReturn(item);
@@ -110,7 +108,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void testFindById() throws IllegalAccessException {
+    void testFindById() {
         when(userStorage.findById(anyLong())).thenReturn(Optional.of(user));
         when(itemStorage.findById(anyLong())).thenReturn(Optional.of(item));
         when(commentStorage.getByItem_IdOrderByCreatedDesc(anyLong())).thenReturn(List.of());
@@ -130,7 +128,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void testDeleteItem() throws IllegalAccessException {
+    void testDeleteItem() {
         long userId = 1L;
         long itemId = 1L;
         User user = new User(userId, "User", "user@email.ru");

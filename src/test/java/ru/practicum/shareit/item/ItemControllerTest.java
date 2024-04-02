@@ -110,7 +110,7 @@ public class ItemControllerTest {
 
         mvc.perform(get("/items/search")
                         .header("X-Sharer-User-Id", 1L)
-                        .param("text", "descr"))
+                        .param("text", "description"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(itemDto.getId()), Long.class))

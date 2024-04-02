@@ -107,7 +107,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void testGet() throws IllegalAccessException {
+    void testGet() {
         when(bookingStorage.findById(anyLong())).thenReturn(Optional.of(booking));
         when(userStorage.findById(anyLong())).thenReturn(Optional.of(user));
         when(itemStorage.findById(anyLong())).thenReturn(Optional.of(item));
