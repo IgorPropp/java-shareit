@@ -61,7 +61,7 @@ public class BookingServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         userDto = new UserDto(1L, "userName", "user@email.ru");
         itemDto = new ItemDto("item1", "description1", true, 1L, null);
         user = new User(1L, "user name", "user@email.ru");
