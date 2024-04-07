@@ -15,15 +15,16 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
+    private final UserMapper userMapper;
 
     public List<UserDto> getAllUsers() {
         return userStorage.findAll().stream()
-                .map(UserMapper::toDto)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public UserDto getUser(Long id) {
-        return UserMapper.toDto(userStorage.findById(id).orElseThrow());
+        return userMapper.toDto(userStorage.findById(id).orElseThrow());
     }
 
     public User createUser(User user) {
@@ -45,7 +46,7 @@ class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             if (userDto.getEmail() != null) user.get().setEmail(userDto.getEmail());
             if (userDto.getName() != null) user.get().setName(userDto.getName());
-            return UserMapper.toDto(userStorage.save(user.get()));
+            return userMapper.toDto(userStorage.save(user.get()));
         } else {
             throw new IllegalArgumentException();
         }

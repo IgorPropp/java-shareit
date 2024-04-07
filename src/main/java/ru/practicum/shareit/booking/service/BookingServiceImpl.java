@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,22 +35,25 @@ public class BookingServiceImpl implements BookingService {
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
     private final BookingStorage bookingStorage;
+    private final BookingMapper bookingMapper;
+    private final UserMapper userMapper;
+    private final ItemMapper itemMapper;
 
     public BookingDto create(Long userId, BookingDtoRequest bookingDtoRequest) throws IllegalAccessException {
         if (!bookingDatesAreValid(bookingDtoRequest)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking time is incorrect");
         }
-        UserDto userDto = UserMapper.toDto(userStorage.findById(userId).orElseThrow());
-        ItemDto itemDto = ItemMapper.toDto(itemStorage.findById(bookingDtoRequest.getItemId()).orElseThrow());
+        UserDto userDto = userMapper.toDto(userStorage.findById(userId).orElseThrow());
+        ItemDto itemDto = itemMapper.toDto(itemStorage.findById(bookingDtoRequest.getItemId()).orElseThrow());
         if (itemStorage.getById(bookingDtoRequest.getItemId()).getOwner().getId().equals(userId))
             throw new NoSuchElementException("Booker is the owner");
         if (itemDto.getAvailable().equals(false)) {
             throw new IllegalAccessException("Item is unavailable");
         }
-        Booking booking = BookingMapper.requestToObject(bookingDtoRequest, ItemMapper.fromDto(itemDto),
-                UserMapper.fromDto(userDto.getId(), userDto), BookingStatus.WAITING);
+        Booking booking = bookingMapper.requestToObject(bookingDtoRequest, itemMapper.fromDto(itemDto),
+                userMapper.fromDto(userDto.getId(), userDto), BookingStatus.WAITING);
         bookingStorage.save(booking);
-        return BookingMapper.toDto(booking, itemDto, userDto);
+        return bookingMapper.toDto(booking, itemDto, userDto);
     }
 
     public BookingDto book(Long userId, Long bookingId, Boolean approved) throws IllegalAccessException {
@@ -64,7 +70,7 @@ public class BookingServiceImpl implements BookingService {
                 booking.setStatus(BookingStatus.REJECTED);
             }
             bookingStorage.save(booking);
-            return BookingMapper.toDto(booking, ItemMapper.toDto(item), UserMapper.toDto(booker));
+            return bookingMapper.toDto(booking, itemMapper.toDto(item), userMapper.toDto(booker));
         }
         throw new NoSuchElementException("Booking not found");
     }
@@ -74,15 +80,17 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemStorage.findById(booking.getItem().getId()).orElseThrow();
         User user = userStorage.findById(booking.getBooker().getId()).orElseThrow();
         if (booking.getBooker().getId().equals(userId) || item.getOwner().getId().equals(userId)) {
-            return BookingMapper.toDto(booking, ItemMapper.toDto(item), UserMapper.toDto(user));
+            return bookingMapper.toDto(booking, itemMapper.toDto(item), userMapper.toDto(user));
         }
         throw new NoSuchElementException("Booking not found");
     }
 
-    public List<BookingDto> getAllBookingsByOwner(Long userId, String string) {
+    public List<BookingDto> getAllBookingsByOwner(Long userId, String string, int page, int size) {
         try {
             BookingState state = BookingState.valueOf(string);
             User user = userStorage.findById(userId).orElseThrow();
+            Sort sort = Sort.by(Sort.Direction.DESC, "start");
+            Pageable pageRequest = PageRequest.of(page, size, sort);
             List<Long> userItemsIds = itemStorage.findAllByOwner(user)
                     .stream()
                     .map(Item::getId)
@@ -91,24 +99,24 @@ public class BookingServiceImpl implements BookingService {
             if (!userItemsIds.isEmpty()) {
                 switch (state) {
                     case ALL:
-                        bookingsByOwner = bookingStorage.getAllForOwner(userItemsIds);
+                        bookingsByOwner = bookingStorage.getAllForOwner(userItemsIds, pageRequest);
                         break;
                     case CURRENT:
-                        bookingsByOwner = bookingStorage.getCurrentBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingStorage.getCurrentBookingsForOwner(userItemsIds, pageRequest);
                         break;
                     case PAST:
-                        bookingsByOwner = bookingStorage.getPastBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingStorage.getPastBookingsForOwner(userItemsIds, pageRequest);
                         break;
                     case FUTURE:
-                        bookingsByOwner = bookingStorage.getFutureBookingsForOwner(userItemsIds);
+                        bookingsByOwner = bookingStorage.getFutureBookingsForOwner(userItemsIds, pageRequest);
                         break;
                     case WAITING:
                         bookingsByOwner = bookingStorage.findBookingByOwnerAndStatusOrderByEndDesc(userItemsIds,
-                                BookingStatus.WAITING);
+                                BookingStatus.WAITING, pageRequest);
                         break;
                     case REJECTED:
                         bookingsByOwner = bookingStorage.findBookingByOwnerAndStatusOrderByEndDesc(userItemsIds,
-                                BookingStatus.REJECTED);
+                                BookingStatus.REJECTED, pageRequest);
                         break;
                     default:
                         throw new IllegalArgumentException();
@@ -117,42 +125,44 @@ public class BookingServiceImpl implements BookingService {
                 throw new IllegalStateException("User has no items");
             }
             return bookingsByOwner.stream()
-                    .map(BookingMapper::toDto)
+                    .map(bookingMapper::toDto)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: UNSUPPORTED_STATUS");
         }
     }
 
-    public List<BookingDto> getAllBookingsForUserByState(Long userId, String string) {
+    public List<BookingDto> getAllBookingsForUserByState(Long userId, String string, int page, int size) {
         try {
             BookingState state = BookingState.valueOf(string);
             Long userIdValue = userStorage.findById(userId).orElseThrow().getId();
+            Sort sort = Sort.by(Sort.Direction.DESC, "start");
+            Pageable pageRequest = PageRequest.of(page, size, sort);
             List<Booking> bookings = new ArrayList<>();
             switch (state) {
                 case ALL:
-                    bookings = bookingStorage.findAllByBookerOrderByEndDesc(userIdValue);
+                    bookings = bookingStorage.findAllByBookerOrderByEndDesc(userIdValue, pageRequest);
                     break;
                 case CURRENT:
-                    bookings = bookingStorage.getCurrentBookingsForBooker(userIdValue);
+                    bookings = bookingStorage.getCurrentBookingsForBooker(userIdValue, pageRequest);
                     break;
                 case PAST:
-                    bookings = bookingStorage.getPastBookingsForBooker(userIdValue);
+                    bookings = bookingStorage.getPastBookingsForBooker(userIdValue, pageRequest);
                     break;
                 case FUTURE:
-                    bookings = bookingStorage.getFutureBookingsForBooker(userIdValue);
+                    bookings = bookingStorage.getFutureBookingsForBooker(userIdValue, pageRequest);
                     break;
                 case WAITING:
                     bookings = bookingStorage.findBookingByBookerAndStatusOrderByEndDesc(userIdValue,
-                            BookingStatus.WAITING);
+                            BookingStatus.WAITING, pageRequest);
                     break;
                 case REJECTED:
                     bookings = bookingStorage.findBookingByBookerAndStatusOrderByEndDesc(userIdValue,
-                            BookingStatus.REJECTED);
+                            BookingStatus.REJECTED, pageRequest);
                     break;
             }
             return bookings.stream()
-                    .map(BookingMapper::toDto)
+                    .map(bookingMapper::toDto)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: UNSUPPORTED_STATUS");
@@ -164,5 +174,4 @@ public class BookingServiceImpl implements BookingService {
                 !booking.getEnd().isBefore(booking.getStart()) && booking.getStart() != booking.getEnd() &&
                 !booking.getStart().equals(booking.getEnd()) && !booking.getStart().isBefore(LocalDateTime.now());
     }
-
 }

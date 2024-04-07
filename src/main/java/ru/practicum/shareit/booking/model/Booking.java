@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.enums.BookingStatus;
@@ -11,9 +13,11 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "bookings")
+@Builder
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +29,7 @@ public class Booking {
     private LocalDateTime end;
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
     @OneToOne
